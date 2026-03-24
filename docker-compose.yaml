@@ -1,0 +1,107 @@
+services:
+
+  postgres:
+    image: postgres:18-alpine
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    volumes:
+      - postgres_data:/var/lib/postgresql
+    ports:
+      - "${POSTGRES_PORT}:5432"
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "${POSTGRES_USER}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    profiles:
+      - infra
+
+  kratos-migrate:
+    image: oryd/kratos:v25.4.0
+    environment:
+      DSN: "postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}?sslmode=disable&max_conns=20&max_idle_conns=4"
+    volumes:
+      - ./kratos/config:/etc/config/kratos
+    command: migrate sql --read-from-env --yes
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: on-failure
+    profiles:
+      - infra
+
+  kratos:
+    image: oryd/kratos:v25.4.0
+    environment:
+      DSN: "postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}?sslmode=disable&max_conns=20&max_idle_conns=4"
+      LOG_LEVEL: debug
+      KRATOS_PUBLIC_URL: "http://localhost:${KRATOS_PUBLIC_PORT}"
+      KRATOS_ADMIN_URL: "http://localhost:${KRATOS_ADMIN_PORT}"
+      FRONTEND_URL: "${FRONTEND_URL}"
+      KRATOS_COOKIE_SECRET: "${KRATOS_COOKIE_SECRET}"
+      KRATOS_CIPHER_SECRET: "${KRATOS_CIPHER_SECRET}"
+      COURIER_SMTP_URI: "${COURIER_SMTP_URI}"
+      COURIER_FROM_ADDRESS: "${COURIER_FROM_ADDRESS}"
+      COURIER_FROM_NAME: "${COURIER_FROM_NAME}"
+    command: serve --config /etc/config/kratos/kratos.yml --dev --watch-courier                                                                                                   
+    ports:
+      - "${KRATOS_PUBLIC_PORT}:4433"
+      - "${KRATOS_ADMIN_PORT}:4434" # in production, we must not expose the admin port
+    volumes:
+      - ./kratos/config:/etc/config/kratos
+    depends_on:
+      postgres:
+        condition: service_healthy
+      kratos-migrate:
+        condition: service_completed_successfully
+    restart: unless-stopped
+    profiles:
+      - infra
+    healthcheck:                                                                                                                                                        
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:4433/health/ready"]
+      interval: 10s                                                                                                                                                     
+      timeout: 5s                                                                                                                                                       
+      retries: 5 
+      start_period: 10s          
+
+  mailpit:
+    image: axllent/mailpit:latest
+    environment:
+      MP_MAX_MESSAGES: 1000
+      MP_SMPT_AUTH_ACCEPT_ANY: 1
+      MP_SMPT_AUTH_ALLOW_INSECURE: 1
+    ports:
+      - "${MAILPIT_SMTP_PORT}:1025"
+      - "${MAILPIT_WEB_PORT}:8025"
+    restart: unless-stopped
+    profiles:
+      - dev
+      - infra
+
+  api:
+    build: .
+    environment:
+      KRATOS_ADMIN_URL: "http://kratos:4434"
+      KRATOS_PUBLIC_URL: "http://kratos:4433"
+      MAILPIT_SMTP_HOST: "mailpit"
+      MAILPIT_SMTP_PORT: 1025
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_HOST: "postgres"
+      POSTGRES_PORT: 5432
+    ports:
+      - "${API_PORT}:8080"
+    depends_on:
+      kratos:
+        condition: service_healthy
+      mailpit:
+        condition: service_healthy
+    restart: unless-stopped
+    profiles:
+      - app
+
+volumes:
+  postgres_data:
