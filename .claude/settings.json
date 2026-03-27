@@ -1,0 +1,7 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(/home/luiz/dev/alfa/poc-ai/server/kratos/config/webhook.registration.jsonnet:*)"
+    ]
+  }
+}

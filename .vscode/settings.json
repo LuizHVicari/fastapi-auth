@@ -1,5 +1,16 @@
 {
   "yaml.schemas": {
     "https://raw.githubusercontent.com/ory/kratos/master/.schemastore/config.schema.json": "kratos/config/kratos.yml"
-  }
+  },
+  "python.defaultInterpreterPath": "${workspaceFolder}/.venv/bin/python",
+  "python.analysis.typeCheckingMode": "off",
+  "[python]": {
+    "editor.defaultFormatter": "charliermarsh.ruff",
+    "editor.formatOnSave": true,
+    "editor.codeActionsOnSave": {
+      "source.fixAll.ruff": "explicit",
+      "source.organizeImports.ruff": "explicit"
+    }
+  },
+  "python.analysis.pyrightConfig": "${workspaceFolder}/pyproject.toml"
 }

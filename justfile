@@ -1,10 +1,8 @@
-# runs the server in development mode
-start-dev host="0.0.0.0" port="8000":
-    uv run fastapi dev app/api.py --host {{host}} --port {{port}}
 
-# starts auxiliary services for development in Docker
+
+# starts auxiliary services for development in Docker (API runs locally)
 start-infra:
-    docker compose --profile infra --profile dev up -d --remove-orphans
+    KRATOS_ENV_FILE=kratos.env.yml docker compose --profile infra --profile dev up -d --remove-orphans
 
 # stops auxiliary services for development
 stop-infra:
@@ -14,6 +12,23 @@ stop-infra:
 delete-infra:
     docker compose --profile infra --profile dev down -v --rmi all --remove-orphans
 
-# starts the server and auxiliary services for development in Docker
+# starts the server and auxiliary services for development in Docker (API runs in Docker)
 start-docker:
-    docker compose --profile infra --profile dev --profile app up -d --remove-orphans
+    KRATOS_ENV_FILE=kratos.env.docker.yml docker compose --profile infra --profile dev --profile app up -d --remove-orphans
+
+start-dev port="" host="":
+    uv run fastapi dev app/api.py {{ if host != "" { "--host " + host } else { "" } }} {{ if port != "" { "--port " + port } else { "" } }}
+
+
+docker-logs service="" tail="100" follow="false":
+    docker compose logs {{ if follow == "true" { "-f" } else { "" } }} --tail={{ tail }} {{ service }}
+
+
+
+
+# generate 32 character random secrets
+generate-secrets:
+    @echo "Generating secrets for Kratos..."
+    @echo "Cookie Secret: $(openssl rand -base64 32)"
+    @echo "Cipher Secret: $(openssl rand -hex 16)"
+    @echo "Webhook Secret: $(openssl rand -base64 32)"

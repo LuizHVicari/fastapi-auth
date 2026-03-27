@@ -13,12 +13,6 @@ serve:
   admin:
     base_url: http://localhost:4434
 
-secrets:
-  cookie:
-    - "+7e8E4HdhYP3CJvM6heq7vT0UI8KfxVPoWrh06dhPZD2QcJJ/uhCt9IGnLTtcAGb"
-  cipher:
-    - "dev-cipher-secret-for-local-use!"
-
 identity:
   default_schema_id: default
   schemas:
@@ -41,9 +35,35 @@ selfservice:
         password:
           hooks:
             - hook: session
+            - hook: web_hook
+              config:
+                url: http://host.docker.internal:8000/webhooks/kratos/registration
+                method: POST
+                body: file:///etc/config/kratos/webhook.registration.jsonnet
+                response:
+                  ignore: false
+                auth:
+                  type: api_key
+                  config:
+                    name: x-kratos-secret
+                    value: ""
+                    in: header
         oidc:
           hooks:
             - hook: session
+            - hook: web_hook
+              config:
+                url: http://host.docker.internal:8000/webhooks/kratos/registration
+                method: POST
+                body: file:///etc/config/kratos/webhook.registration.jsonnet
+                response:
+                  ignore: false
+                auth:
+                  type: api_key
+                  config:
+                    name: x-kratos-secret
+                    value: ""
+                    in: header
 
     login:
       ui_url: http://localhost:3000/auth/login
