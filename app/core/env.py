@@ -32,7 +32,7 @@ class Settings(BaseSettings):
     @computed_field
     @property
     def postgres_url(self) -> str:
-        return f"asyncpg://{self.postgres_user}:{self.postgres_password.get_secret_value()}@{self.postgres_host}:{self.postgres_port}/{self.postgres_db}"
+        return f"postgresql+asyncpg://{self.postgres_user}:{self.postgres_password.get_secret_value()}@{self.postgres_host}:{self.postgres_port}/{self.postgres_db}"
 
     @computed_field
     @property
@@ -43,6 +43,7 @@ class Settings(BaseSettings):
     @property
     def kratos_admin_url(self) -> str:
         return f"http://{self.kratos_admin_host}:{self.kratos_admin_port}"
+
 
 
 settings = Settings()  # type: ignore

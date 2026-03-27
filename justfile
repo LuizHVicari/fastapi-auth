@@ -24,6 +24,25 @@ docker-logs service="" tail="100" follow="false":
     docker compose logs {{ if follow == "true" { "-f" } else { "" } }} --tail={{ tail }} {{ service }}
 
 
+# generate a new migration (requires running infra)
+migrate-generate name:
+    uv run alembic revision --autogenerate -m "{{ name }}"
+
+# apply all pending migrations (requires running infra)
+migrate-up:
+    uv run alembic upgrade head
+
+# rollback last migration
+migrate-down:
+    uv run alembic downgrade -1
+
+# show current migration state
+migrate-status:
+    uv run alembic current
+
+# show migration history
+migrate-history:
+    uv run alembic history --verbose
 
 
 # generate 32 character random secrets

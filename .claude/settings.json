@@ -1,7 +1,15 @@
 {
   "permissions": {
     "allow": [
-      "Bash(/home/luiz/dev/alfa/poc-ai/server/kratos/config/webhook.registration.jsonnet:*)"
+      "Bash(/home/luiz/dev/alfa/poc-ai/server/kratos/config/webhook.registration.jsonnet:*)",
+      "Bash(uv add:*)",
+      "Bash(uv run:*)",
+      "Bash(uv remove:*)",
+      "Bash(pip index:*)",
+      "Bash(uv pip:*)",
+      "Bash(curl -s \"https://pypi.org/pypi/aiobreaker-stubs/json\")",
+      "Bash(python3 -c \"import sys,json; d=json.load\\(sys.stdin\\); print\\(d.get\\(''''info'''',{}\\).get\\(''''name'''',''''not found''''\\)\\)\")",
+      "Bash(curl -s \"https://pypi.org/pypi/types-aiobreaker/json\")"
     ]
   }
 }
