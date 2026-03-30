@@ -1,4 +1,4 @@
-from enum import Enum, StrEnum
+from enum import StrEnum
 
 from pydantic import SecretStr, computed_field
 from pydantic_settings import BaseSettings, SettingsConfigDict
@@ -31,6 +31,11 @@ class Settings(BaseSettings):
 
     @computed_field
     @property
+    def db_echo(self) -> bool:
+        return self.log_level == LogLevel.DEBUG
+
+    @computed_field
+    @property
     def postgres_url(self) -> str:
         return f"postgresql+asyncpg://{self.postgres_user}:{self.postgres_password.get_secret_value()}@{self.postgres_host}:{self.postgres_port}/{self.postgres_db}"
 
@@ -43,7 +48,6 @@ class Settings(BaseSettings):
     @property
     def kratos_admin_url(self) -> str:
         return f"http://{self.kratos_admin_host}:{self.kratos_admin_port}"
-
 
 
 settings = Settings()  # type: ignore
