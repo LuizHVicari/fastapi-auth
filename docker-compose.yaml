@@ -8,6 +8,7 @@ services:
       POSTGRES_DB: ${POSTGRES_DB}
     volumes:
       - postgres_data:/var/lib/postgresql
+      - ./postgres/init.sql:/docker-entrypoint-initdb.d/init.sql
     ports:
       - "${POSTGRES_PORT}:5432"
     healthcheck:
@@ -19,9 +20,9 @@ services:
       - infra
 
   kratos-migrate:
-    image: oryd/kratos:v25.4.0
+    image: oryd/kratos:v26.2.0
     environment:
-      DSN: "postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}?sslmode=disable&max_conns=20&max_idle_conns=4"
+      DSN: "postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/kratos?sslmode=disable&max_conns=20&max_idle_conns=4"
     volumes:
       - ./kratos/config:/etc/config/kratos
     command: migrate sql --read-from-env --yes
@@ -33,9 +34,9 @@ services:
       - infra
 
   kratos:
-    image: oryd/kratos:v25.4.0
+    image: oryd/kratos:v26.2.0
     environment:
-      DSN: "postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}?sslmode=disable&max_conns=20&max_idle_conns=4"
+      DSN: "postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/kratos?sslmode=disable&max_conns=20&max_idle_conns=4"
       LOG_LEVEL: debug
       KRATOS_PUBLIC_URL: "http://localhost:${KRATOS_PUBLIC_PORT}"
       KRATOS_ADMIN_URL: "http://localhost:${KRATOS_ADMIN_PORT}"
@@ -45,10 +46,10 @@ services:
       COURIER_SMTP_URI: "${COURIER_SMTP_URI}"
       COURIER_FROM_ADDRESS: "${COURIER_FROM_ADDRESS}"
       COURIER_FROM_NAME: "${COURIER_FROM_NAME}"
-    command: serve --config /etc/config/kratos/kratos.yml --config /etc/config/kratos/${KRATOS_ENV_FILE:-kratos.env.yml} --dev --watch-courier                                                                                                   
+    command: serve --config /etc/config/kratos/kratos.yml --config /etc/config/kratos/${KRATOS_ENV_FILE:-kratos.env.yml} --dev --watch-courier
     ports:
       - "${KRATOS_PUBLIC_PORT}:4433"
-      - "${KRATOS_ADMIN_PORT}:4434" # in production, we must not expose the admin port
+      - "${KRATOS_ADMIN_PORT}:4434"
     volumes:
       - ./kratos/config:/etc/config/kratos
     depends_on:
@@ -63,10 +64,50 @@ services:
       - infra
     healthcheck:
       test: ["CMD", "wget", "--spider", "-q", "http://localhost:4433/health/ready"]
-      interval: 10s                                                                                                                                                     
-      timeout: 5s                                                                                                                                                       
-      retries: 5 
-      start_period: 10s          
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+  keto-migrate:
+    image: oryd/keto:v26.2.0
+    environment:
+      DSN: "postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/keto?sslmode=disable&max_conns=20&max_idle_conns=4"
+    volumes:
+      - ./keto/config:/etc/config/keto
+    command: migrate up --yes --config /etc/config/keto/keto.yml
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: on-failure
+    profiles:
+      - infra
+
+  keto:
+    image: oryd/keto:v26.2.0
+    environment:
+      DSN: "postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/keto?sslmode=disable&max_conns=20&max_idle_conns=4"
+      LOG_LEVEL: debug
+    command: serve --config /etc/config/keto/keto.yml
+    ports:
+      - "${KETO_READ_PORT}:4466"
+      - "${KETO_WRITE_PORT}:4467"
+    volumes:
+      - ./keto/config:/etc/config/keto
+    depends_on:
+      postgres:
+        condition: service_healthy
+      keto-migrate:
+        condition: service_completed_successfully
+    restart: unless-stopped
+    profiles:
+      - infra
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:4466/health/ready"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
 
   mailpit:
     image: axllent/mailpit:latest
@@ -87,6 +128,8 @@ services:
     environment:
       KRATOS_ADMIN_URL: "http://kratos:4434"
       KRATOS_PUBLIC_URL: "http://kratos:4433"
+      KETO_READ_URL: "http://keto:4466"
+      KETO_WRITE_URL: "http://keto:4467"
       MAILPIT_SMTP_HOST: "mailpit"
       MAILPIT_SMTP_PORT: 1025
       POSTGRES_USER: ${POSTGRES_USER}
@@ -98,6 +141,8 @@ services:
       - "${API_PORT}:8080"
     depends_on:
       kratos:
+        condition: service_healthy
+      keto:
         condition: service_healthy
       mailpit:
         condition: service_healthy

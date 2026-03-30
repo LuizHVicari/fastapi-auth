@@ -1,11 +1,9 @@
 import asyncio
 from logging.config import fileConfig
 
-from sqlalchemy import pool
+from sqlalchemy import pool, text
 from sqlalchemy.engine import Connection
 from sqlalchemy.ext.asyncio import async_engine_from_config
-
-from sqlalchemy import text
 
 from alembic import context
 
@@ -29,6 +27,7 @@ def run_migrations_offline() -> None:
         target_metadata=target_metadata,
         literal_binds=True,
         dialect_opts={"paramstyle": "named"},
+        version_table_schema=settings.postgres_schema,
     )
 
     with context.begin_transaction():
@@ -40,9 +39,7 @@ def do_run_migrations(connection: Connection) -> None:
         connection=connection,
         target_metadata=target_metadata,
         include_schemas=True,
-        include_name=lambda name, type_, _parent_names: (
-            name == "app" if type_ == "schema" else True
-        ),
+        version_table_schema=settings.postgres_schema,
     )
 
     with context.begin_transaction():
@@ -57,7 +54,9 @@ async def run_async_migrations() -> None:
     )
 
     async with connectable.connect() as connection:
-        await connection.execute(text("CREATE SCHEMA IF NOT EXISTS app"))
+        await connection.execute(
+            text(f'CREATE SCHEMA IF NOT EXISTS "{settings.postgres_schema}"')
+        )
         await connection.run_sync(do_run_migrations)
 
     await connectable.dispose()

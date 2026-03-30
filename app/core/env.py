@@ -20,12 +20,18 @@ class Settings(BaseSettings):
     postgres_password: SecretStr
     postgres_host: str
     postgres_port: int
+    postgres_schema: str = "public"
 
     kratos_public_host: str
     kratos_public_port: int
     kratos_admin_host: str
     kratos_admin_port: int
     kratos_webhook_secret: SecretStr
+
+    keto_read_host: str
+    keto_read_port: int
+    keto_write_host: str
+    keto_write_port: int
 
     log_level: LogLevel = LogLevel.INFO
 
@@ -48,6 +54,16 @@ class Settings(BaseSettings):
     @property
     def kratos_admin_url(self) -> str:
         return f"http://{self.kratos_admin_host}:{self.kratos_admin_port}"
+
+    @computed_field
+    @property
+    def keto_read_url(self) -> str:
+        return f"http://{self.keto_read_host}:{self.keto_read_port}"
+
+    @computed_field
+    @property
+    def keto_write_url(self) -> str:
+        return f"http://{self.keto_write_host}:{self.keto_write_port}"
 
 
 settings = Settings()  # type: ignore

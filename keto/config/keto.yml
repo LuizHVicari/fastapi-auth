@@ -1,0 +1,20 @@
+version: v0.13.0
+
+dsn: postgres://app:app@postgres:5432/keto?sslmode=disable&max_conns=20&max_idle_conns=4
+
+serve:
+  read:
+    host: 0.0.0.0
+    port: 4466
+  write:
+    host: 0.0.0.0
+    port: 4467
+
+namespaces:
+  - id: 0
+    name: default
+
+log:
+  level: debug
+  format: json
+  leak_sensitive_values: false
