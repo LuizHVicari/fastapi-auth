@@ -16,6 +16,11 @@ delete-infra:
 start-docker:
     KRATOS_ENV_FILE=kratos.env.docker.yml docker compose --profile infra --profile dev --profile app up -d --remove-orphans
 
+# run type checker and linter
+check:
+    uv run pyright
+    uv run ruff check
+
 start-dev port="" host="":
     uv run fastapi dev app/api.py {{ if host != "" { "--host " + host } else { "" } }} {{ if port != "" { "--port " + port } else { "" } }}
 

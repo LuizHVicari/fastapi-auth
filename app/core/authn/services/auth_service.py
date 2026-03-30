@@ -1,6 +1,10 @@
 from uuid import UUID
 
-from app.core.authn.errors import AuthProviderUnavailableError, InvalidSessionError, MissingSessionTokenError
+from app.core.authn.errors import (
+    AuthProviderUnavailableError,
+    InvalidSessionError,
+    MissingSessionTokenError,
+)
 from app.core.authn.ports import ProviderFailure, SessionProvider
 
 

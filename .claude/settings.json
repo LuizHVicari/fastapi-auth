@@ -12,7 +12,9 @@
       "Bash(curl -s \"https://pypi.org/pypi/types-aiobreaker/json\")",
       "Read(//home/luiz/dev/alfa/poc-ai/**)",
       "Bash(find /home/luiz/dev/alfa/poc-ai/server/kratos -type f -name *.json -o -name *.jsonnet)",
-      "Bash(curl -s \"https://api.github.com/repos/ory/keto/releases/latest\")"
+      "Bash(curl -s \"https://api.github.com/repos/ory/keto/releases/latest\")",
+      "Bash(just start-infra:*)",
+      "Bash(just check:*)"
     ]
   }
 }

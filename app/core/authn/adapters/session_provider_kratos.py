@@ -4,11 +4,12 @@ from uuid import UUID
 import httpx
 
 from app.core.authn.entities.session import Session, SessionIdentity
+from app.core.authn.ports import SessionProvider
 from app.core.authn.ports.session_provider import ProviderFailure, ProviderResponse, ProviderSuccess
 from app.core.env import settings
 
 
-class KratosSessionProvider:
+class KratosSessionProvider(SessionProvider):
     @override
     async def fetch_session(self, token: str | None, cookie: str | None) -> ProviderResponse:
         async with httpx.AsyncClient() as client:

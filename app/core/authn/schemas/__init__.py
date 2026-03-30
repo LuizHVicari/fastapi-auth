@@ -1,4 +1,10 @@
-from .kratos import Identity, KratosWebhookResponse, RecoveryAddress, RegistrationWebhookRequest, VerifiableAddress
+from .kratos import (
+    Identity,
+    KratosWebhookResponse,
+    RecoveryAddress,
+    RegistrationWebhookRequest,
+    VerifiableAddress,
+)
 from .user import CurrentUserResponse, UserRequest, UserResponse
 
 __all__ = [
