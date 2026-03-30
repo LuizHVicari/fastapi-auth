@@ -1,6 +1,8 @@
+from uuid import uuid7
+
 from fastapi import APIRouter
 
-from app.core.authn.dependencies import CurrentUser, UserServiceDep
+from app.core.authn.dependencies import CurrentAuthProviderUserId, CurrentUser, UserServiceDep
 from app.core.authn.entities.user import User
 from app.core.authn.schemas import CurrentUserResponse, UserRequest, UserResponse
 from app.utils.time_utils import now_utc
@@ -26,13 +28,15 @@ async def current_user(user: CurrentUser) -> CurrentUserResponse:
 
 @router.post("/profile")
 async def create_profile(
-    request: UserRequest, current_user: CurrentUser, user_service: UserServiceDep
+    request: UserRequest,
+    auth_provider_user_id: CurrentAuthProviderUserId,
+    user_service: UserServiceDep,
 ) -> UserResponse:
     now = now_utc()
     user = await user_service.create_user(
         User(
-            id=current_user.id,
-            auth_provider_id=current_user.auth_provider_id,
+            id=uuid7(),
+            auth_provider_id=str(auth_provider_user_id),
             name=request.name,
             avatar_url=request.avatar_url,
             created_at=now,

@@ -7,6 +7,7 @@ from app.core.authn.adapters.session_provider_kratos import KratosSessionProvide
 from app.core.authn.adapters.token_provider_hydra import HydraTokenProvider
 from app.core.authn.adapters.user_repository_sql import UserRepositorySql
 from app.core.authn.entities.user import User
+from app.core.authn.errors import UserNotRegisteredError
 from app.core.authn.security import hydra_oauth2, kratos_session_cookie, kratos_session_token
 from app.core.authn.services.auth_service import AuthService
 from app.core.authn.services.user_service import UserService
@@ -60,14 +61,17 @@ async def get_auth_provider_user_id(
     return await auth_service.get_auth_provider_user_id(x_session_token, ory_kratos_session, bearer)
 
 
-AuthProviderUserIdDep = Annotated[UUID, Depends(get_auth_provider_user_id)]
+CurrentAuthProviderUserId = Annotated[UUID, Depends(get_auth_provider_user_id)]
 
 
 async def get_current_user(
-    auth_provider_user_id: AuthProviderUserIdDep,
+    auth_provider_user_id: CurrentAuthProviderUserId,
     user_service: UserServiceDep,
 ) -> User:
-    return await user_service.get_user_by_auth_provider_id(str(auth_provider_user_id))
+    user = await user_service.get_user_by_auth_provider_id(str(auth_provider_user_id))
+    if user is None:
+        raise UserNotRegisteredError()
+    return user
 
 
 CurrentUser = Annotated[User, Depends(get_current_user)]

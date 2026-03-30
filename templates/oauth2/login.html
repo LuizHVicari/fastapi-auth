@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="refresh" content="0; url={{ kratos_login_url }}">
+  <title>Entrando...</title>
+  <link rel="stylesheet" href="/static/oauth2.css">
+</head>
+<body>
+  <div class="card">
+    <div class="logo">
+      <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 14H9V8h2v8zm4 0h-2V8h2v8z"/>
+      </svg>
+    </div>
+    <h1>Autenticação necessária</h1>
+    <p class="subtitle">Você será redirecionado para fazer login. Aguarde um momento.</p>
+
+    <div class="spinner"></div>
+    <p class="redirect-msg">Redirecionando para o login...</p>
+
+    <a href="{{ kratos_login_url }}" class="btn btn-primary btn-center">
+      Ir para o login agora
+    </a>
+
+    <p class="note">
+      Após o login, você retornará automaticamente para continuar o fluxo de autorização.
+    </p>
+  </div>
+</body>
+</html>

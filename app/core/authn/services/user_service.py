@@ -7,11 +7,8 @@ class UserService:
     def __init__(self, user_repository: UserRepository) -> None:
         self.__user_repository = user_repository
 
-    async def get_user_by_auth_provider_id(self, auth_provider_id: str) -> User:
+    async def get_user_by_auth_provider_id(self, auth_provider_id: str) -> User | None:
         user = await self.__user_repository.find_user_by_auth_provider_id(auth_provider_id)
-
-        if user is None:
-            raise UserNotFoundError(auth_provider_id=auth_provider_id)
 
         return user
 

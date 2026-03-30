@@ -1,3 +1,3 @@
-from .hydra_provider_hydra import HydraProviderHydra
+from .oauth2_challenge_provider_http import OAuth2ChallengeProviderHttp
 
-__all__ = ["HydraProviderHydra"]
+__all__ = ["OAuth2ChallengeProviderHttp"]

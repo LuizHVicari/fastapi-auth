@@ -21,6 +21,10 @@ identity:
 
 selfservice:
   default_browser_return_url: http://localhost:3000
+  allowed_return_urls:
+    - http://localhost:3000
+    - http://localhost:8000
+    - http://localhost:8000/auth/setup-profile
 
   methods:
     password:
@@ -30,8 +34,9 @@ selfservice:
 
   flows:
     registration:
-      ui_url: http://localhost:3000/auth/registration
+      ui_url: http://localhost:8000/auth/registration
       after:
+        default_browser_return_url: http://localhost:8000/auth/setup-profile
         password:
           hooks:
             - hook: session
@@ -66,7 +71,7 @@ selfservice:
                     in: header
 
     login:
-      ui_url: http://localhost:3000/auth/login
+      ui_url: http://localhost:8000/auth/login
       after:
         password:
           hooks:

@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login</title>
+  <link rel="stylesheet" href="/static/oauth2.css">
+</head>
+<body>
+  <div class="card">
+    <div class="logo">
+      <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+        <path d="M12 12c2.7 0 4.8-2.1 4.8-4.8S14.7 2.4 12 2.4 7.2 4.5 7.2 7.2 9.3 12 12 12zm0 2.4c-3.2 0-9.6 1.6-9.6 4.8v2.4h19.2v-2.4c0-3.2-6.4-4.8-9.6-4.8z"/>
+      </svg>
+    </div>
+
+    <h1>Entrar na sua conta</h1>
+    <p class="subtitle">Use seu e-mail e senha para continuar.</p>
+
+    {% if error %}
+    <div class="error-box">{{ error }}</div>
+    {% endif %}
+
+    <form method="POST" action="{{ action }}">
+      {% for field in hidden_fields %}
+      <input type="hidden" name="{{ field.name }}" value="{{ field.value }}">
+      {% endfor %}
+
+      <div class="field">
+        <label for="identifier">E-mail</label>
+        <input
+          type="email"
+          id="identifier"
+          name="identifier"
+          autocomplete="email"
+          placeholder="voce@exemplo.com"
+          required
+        >
+      </div>
+
+      <div class="field">
+        <label for="password">Senha</label>
+        <input
+          type="password"
+          id="password"
+          name="password"
+          autocomplete="current-password"
+          placeholder="••••••••"
+          required
+        >
+      </div>
+
+      <input type="hidden" name="method" value="password">
+
+      <button type="submit" class="btn btn-primary btn-center" style="margin-top: 8px;">
+        Entrar
+      </button>
+    </form>
+
+    <p class="note" style="margin-top: 16px;">
+      Não tem uma conta?
+      <a href="{{ registration_url }}" style="color: var(--accent); text-decoration: none;">Cadastre-se</a>
+    </p>
+  </div>
+</body>
+</html>
