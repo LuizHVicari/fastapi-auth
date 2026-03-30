@@ -9,6 +9,7 @@ from app.core.shared.errors import AppError
 
 from .core.authn.http import authn_router, authn_webhooks_router
 from .core.database import engine
+from .core.oauth2.http import router as oauth2_router
 
 
 @asynccontextmanager
@@ -22,11 +23,16 @@ async def lifespan(_app: FastAPI) -> AsyncGenerator[None]:
 app = FastAPI(
     lifespan=lifespan,
     title=settings.app_name,
-    description="Authenticated via Ory Kratos — use either `X-Session-Token` header or `ory_kratos_session` cookie.",
+    description=(
+        "Authenticated via Ory Kratos (browser) or Ory Hydra OAuth2 (API/MCP clients). "
+        "Browser clients use `X-Session-Token` header or `ory_kratos_session` cookie. "
+        "API clients use the Authorization Code flow documented below."
+    ),
 )
 
 app.include_router(authn_webhooks_router)
 app.include_router(authn_router)
+app.include_router(oauth2_router)
 
 
 class HealthResponse(TypedDict):

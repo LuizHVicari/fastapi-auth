@@ -56,3 +56,6 @@ generate-secrets:
     @echo "Cookie Secret: $(openssl rand -base64 32)"
     @echo "Cipher Secret: $(openssl rand -hex 16)"
     @echo "Webhook Secret: $(openssl rand -base64 32)"
+    @echo ""
+    @echo "Generating secrets for Hydra..."
+    @echo "System Secret: $(openssl rand -hex 32)"

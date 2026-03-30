@@ -35,6 +35,11 @@ class Settings(BaseSettings):
     keto_write_host: str
     keto_write_port: int
 
+    hydra_public_host: str
+    hydra_public_port: int
+    hydra_admin_host: str
+    hydra_admin_port: int
+
     log_level: LogLevel = LogLevel.INFO
 
     @computed_field
@@ -66,6 +71,16 @@ class Settings(BaseSettings):
     @property
     def keto_write_url(self) -> str:
         return f"http://{self.keto_write_host}:{self.keto_write_port}"
+
+    @computed_field
+    @property
+    def hydra_public_url(self) -> str:
+        return f"http://{self.hydra_public_host}:{self.hydra_public_port}"
+
+    @computed_field
+    @property
+    def hydra_admin_url(self) -> str:
+        return f"http://{self.hydra_admin_host}:{self.hydra_admin_port}"
 
 
 settings = Settings()  # type: ignore

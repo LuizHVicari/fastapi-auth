@@ -14,3 +14,4 @@ wheels/
 kratos/config/kratos.env.yml
 kratos/config/kratos.env.docker.yml
 keto/config/keto.env.yml
+hydra/config/hydra.env.yml

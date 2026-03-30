@@ -109,6 +109,75 @@ services:
       retries: 5
       start_period: 10s
 
+  hydra-migrate:
+    image: oryd/hydra:v2.3.0
+    environment:
+      DSN: "postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/hydra?sslmode=disable&max_conns=20&max_idle_conns=4"
+    command: migrate sql up -e --yes
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: on-failure
+    profiles:
+      - infra
+
+  hydra:
+    image: oryd/hydra:v2.3.0
+    environment:
+      DSN: "postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/hydra?sslmode=disable&max_conns=20&max_idle_conns=4"
+      LOG_LEVEL: debug
+      URLS_SELF_ISSUER: "http://localhost:${HYDRA_PUBLIC_PORT}"
+      URLS_CONSENT: "http://host.docker.internal:${API_PORT}/oauth2/consent"
+      URLS_LOGIN: "http://host.docker.internal:${API_PORT}/oauth2/login"
+      URLS_LOGOUT: "http://host.docker.internal:${API_PORT}/oauth2/logout"
+    command: serve all --config /etc/config/hydra/hydra.yml --config /etc/config/hydra/hydra.env.yml --dev
+    ports:
+      - "${HYDRA_PUBLIC_PORT}:4444"
+      - "${HYDRA_ADMIN_PORT}:4445"
+    volumes:
+      - ./hydra/config:/etc/config/hydra
+    depends_on:
+      postgres:
+        condition: service_healthy
+      hydra-migrate:
+        condition: service_completed_successfully
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    restart: unless-stopped
+    profiles:
+      - infra
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:4444/health/ready"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+  hydra-setup:
+    image: oryd/hydra:v2.3.0
+    environment:
+      HYDRA_ADMIN_URL: "http://hydra:4445"
+    entrypoint: sh -c
+    command:
+      - |
+        hydra create oauth2-client \
+          --endpoint http://hydra:4445 \
+          --id "${HYDRA_MCP_CLIENT_ID}" \
+          --secret "${HYDRA_MCP_CLIENT_SECRET}" \
+          --name "mcp-client" \
+          --grant-type authorization_code,refresh_token \
+          --response-type code \
+          --scope openid,offline \
+          --redirect-uri "${HYDRA_MCP_REDIRECT_URI}" \
+          --token-endpoint-auth-method client_secret_post \
+        || true
+    depends_on:
+      hydra:
+        condition: service_healthy
+    restart: on-failure
+    profiles:
+      - infra
+
   adminer:
     image: adminer:latest
     ports:
