@@ -1,11 +1,12 @@
 from typing import Annotated
 from uuid import UUID
 
-from fastapi import Cookie, Depends, Header
+from fastapi import Depends, Security
 
 from app.core.authn.adapters.session_provider_kratos import KratosSessionProvider
 from app.core.authn.adapters.user_repository_sql import UserRepositorySql
 from app.core.authn.entities.user import User
+from app.core.authn.security import kratos_session_cookie, kratos_session_token
 from app.core.authn.services.auth_service import AuthService
 from app.core.authn.services.user_service import UserService
 from app.core.database.engine import DbSession
@@ -41,8 +42,8 @@ UserServiceDep = Annotated[UserService, Depends(get_user_service)]
 
 async def get_auth_provider_user_id(
     auth_service: AuthServiceDep,
-    x_session_token: Annotated[str | None, Header()] = None,
-    ory_kratos_session: Annotated[str | None, Cookie()] = None,
+    x_session_token: Annotated[str | None, Security(kratos_session_token)] = None,
+    ory_kratos_session: Annotated[str | None, Security(kratos_session_cookie)] = None,
 ) -> UUID:
     return await auth_service.get_auth_provider_user_id(x_session_token, ory_kratos_session)
 

@@ -4,6 +4,7 @@ from typing import Any, TypedDict
 
 from fastapi import FastAPI, HTTPException
 
+from app.core.env import settings
 from app.core.shared.errors import AppError
 
 from .core.authn.http import authn_router, authn_webhooks_router
@@ -18,7 +19,11 @@ async def lifespan(_app: FastAPI) -> AsyncGenerator[None]:
     await engine.dispose()
 
 
-app = FastAPI(lifespan=lifespan)
+app = FastAPI(
+    lifespan=lifespan,
+    title=settings.app_name,
+    description="Authenticated via Ory Kratos — use either `X-Session-Token` header or `ory_kratos_session` cookie.",
+)
 
 app.include_router(authn_webhooks_router)
 app.include_router(authn_router)

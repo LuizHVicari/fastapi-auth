@@ -5,6 +5,7 @@ from alembic import context
 from sqlalchemy import pool, text
 from sqlalchemy.engine import Connection
 from sqlalchemy.ext.asyncio import async_engine_from_config
+from sqlalchemy.sql.schema import SchemaItem
 
 from app.core.database.models import Base
 from app.core.env import settings
@@ -26,11 +27,22 @@ def run_migrations_offline() -> None:
         target_metadata=target_metadata,
         literal_binds=True,
         dialect_opts={"paramstyle": "named"},
-        version_table_schema=settings.postgres_schema,
     )
 
     with context.begin_transaction():
         context.run_migrations()
+
+
+def _include_object(
+    _obj: SchemaItem,
+    name: str | None,
+    type_: str,
+    reflected: bool,
+    _compare_to: SchemaItem | None,
+) -> bool:
+    if type_ == "table" and reflected:
+        return name != "alembic_version"
+    return True
 
 
 def do_run_migrations(connection: Connection) -> None:
@@ -38,7 +50,7 @@ def do_run_migrations(connection: Connection) -> None:
         connection=connection,
         target_metadata=target_metadata,
         include_schemas=True,
-        version_table_schema=settings.postgres_schema,
+        include_object=_include_object,
     )
 
     with context.begin_transaction():
@@ -52,10 +64,14 @@ async def run_async_migrations() -> None:
         poolclass=pool.NullPool,
     )
 
+    schemas = {settings.postgres_schema} | {
+        table.schema for table in target_metadata.tables.values() if table.schema
+    }
+
     async with connectable.connect() as connection:
-        await connection.execute(
-            text(f'CREATE SCHEMA IF NOT EXISTS "{settings.postgres_schema}"')
-        )
+        for schema in schemas:
+            await connection.execute(text(f'CREATE SCHEMA IF NOT EXISTS "{schema}"'))
+        await connection.commit()
         await connection.run_sync(do_run_migrations)
 
     await connectable.dispose()

@@ -9,6 +9,7 @@ from .base import Base
 
 class UserTable(Base):
     __tablename__ = "user"
+    __table_args__ = {"schema": "auth"}
 
     id: Mapped[UUID] = mapped_column(primary_key=True, default=uuid7)
     auth_provider_id: Mapped[str] = mapped_column(unique=True)

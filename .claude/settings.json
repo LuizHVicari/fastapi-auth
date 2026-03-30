@@ -14,7 +14,15 @@
       "Bash(find /home/luiz/dev/alfa/poc-ai/server/kratos -type f -name *.json -o -name *.jsonnet)",
       "Bash(curl -s \"https://api.github.com/repos/ory/keto/releases/latest\")",
       "Bash(just start-infra:*)",
-      "Bash(just check:*)"
+      "Bash(just check:*)",
+      "Bash(just delete-infra:*)",
+      "Bash(just migrate-generate:*)",
+      "Bash(just migrate-up:*)",
+      "Bash(just migrate-status:*)",
+      "Bash(cat migrations/versions/*test*)"
+    ],
+    "additionalDirectories": [
+      "/home/luiz/dev/alfa/poc-ai/server/migrations/versions"
     ]
   }
 }

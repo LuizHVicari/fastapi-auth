@@ -15,6 +15,8 @@ class LogLevel(StrEnum):
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8", extra="ignore")
 
+    app_name: str = "poc-ai"
+
     postgres_db: str
     postgres_user: str
     postgres_password: SecretStr
