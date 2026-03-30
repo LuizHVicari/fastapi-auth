@@ -76,6 +76,11 @@ def setup_logging() -> None:
         log.propagate = False
 
 
+def current_trace_id() -> str | None:
+    ctx = trace.get_current_span().get_span_context()
+    return format(ctx.trace_id, "032x") if ctx.is_valid else None
+
+
 def setup_tracing(engine: AsyncEngine) -> None:
     provider = TracerProvider(resource=_resource)
     provider.add_span_processor(

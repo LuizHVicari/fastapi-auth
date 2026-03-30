@@ -1,11 +1,11 @@
 import time
-import uuid
 from collections.abc import AsyncGenerator
 from contextlib import asynccontextmanager
 from typing import Any, TypedDict
 
 from fastapi import FastAPI, HTTPException, Request
 from loguru import logger
+from opentelemetry import trace as otel_trace
 from prometheus_fastapi_instrumentator import Instrumentator
 
 from app.core.env import settings
@@ -54,10 +54,13 @@ app.include_router(oauth2_router)
 
 @app.middleware("http")
 async def request_logging(request: Request, call_next: Any) -> Any:  # noqa: ANN401
-    request_id = str(uuid.uuid4())
     start = time.perf_counter()
 
     response = await call_next(request)
+
+    span = otel_trace.get_current_span()
+    ctx = span.get_span_context()
+    trace_id = format(ctx.trace_id, "032x") if ctx.is_valid else "no-trace"
 
     logger.info(
         "{method} {path} {status_code} {duration}s",
@@ -65,11 +68,11 @@ async def request_logging(request: Request, call_next: Any) -> Any:  # noqa: ANN
         path=request.url.path,
         status_code=response.status_code,
         duration=round(time.perf_counter() - start, 4),
-        request_id=request_id,
+        trace_id=trace_id,
         client=request.client.host if request.client else None,
     )
 
-    response.headers["X-Request-ID"] = request_id
+    response.headers["X-Trace-ID"] = trace_id
     return response
 
 

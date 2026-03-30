@@ -229,10 +229,6 @@ services:
     profiles:
       - app
 
-  # ---------------------------------------------------------------------------
-  # Observability stack
-  # ---------------------------------------------------------------------------
-
   loki:
     image: grafana/loki:3.5.0
     command: -config.file=/etc/loki/loki.yml
