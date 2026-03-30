@@ -19,7 +19,9 @@
       "Bash(just migrate-generate:*)",
       "Bash(just migrate-up:*)",
       "Bash(just migrate-status:*)",
-      "Bash(cat migrations/versions/*test*)"
+      "Bash(cat migrations/versions/*test*)",
+      "Bash(curl -s http://localhost:8000/health)",
+      "Bash(curl -s http://localhost:8001/health)"
     ],
     "additionalDirectories": [
       "/home/luiz/dev/alfa/poc-ai/server/migrations/versions"
