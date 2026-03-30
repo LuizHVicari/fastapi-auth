@@ -15,7 +15,7 @@ class LogLevel(StrEnum):
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8", extra="ignore")
 
-    app_name: str = "poc-ai"
+    app_name: str
 
     postgres_db: str
     postgres_user: str
@@ -41,6 +41,7 @@ class Settings(BaseSettings):
     hydra_admin_port: int
 
     log_level: LogLevel = LogLevel.INFO
+    otel_exporter_endpoint: str
 
     @computed_field
     @property

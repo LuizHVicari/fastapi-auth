@@ -16,6 +16,34 @@ delete-infra:
 start-docker:
     KRATOS_ENV_FILE=kratos.env.docker.yml docker compose --profile infra --profile dev --profile app up -d --remove-orphans
 
+# reloads Alloy config without full restart
+reload-obs:
+    curl -s -X POST http://localhost:12345/-/reload && echo "Alloy reloaded"
+
+# starts observability stack (Grafana, Loki, Alloy, Prometheus, Tempo)
+start-obs:
+    docker compose --profile observability up -d --remove-orphans
+
+# stops observability stack
+stop-obs:
+    docker compose --profile observability down --remove-orphans
+
+# removes observability stack including volumes
+delete-obs:
+    docker compose --profile observability down -v --remove-orphans
+
+# starts infra + observability
+start-all:
+    KRATOS_ENV_FILE=kratos.env.yml docker compose --profile infra --profile dev --profile observability up -d --remove-orphans
+
+# stops infra + observability
+stop-all:
+    docker compose --profile infra --profile dev --profile observability down --remove-orphans
+
+# removes infra + observability including volumes
+delete-all:
+    docker compose --profile infra --profile dev --profile observability down -v --rmi all --remove-orphans
+
 # run type checker and linter
 check:
     uv run pyright

@@ -215,6 +215,7 @@ services:
       POSTGRES_DB: ${POSTGRES_DB}
       POSTGRES_HOST: "postgres"
       POSTGRES_PORT: 5432
+      OTEL_EXPORTER_ENDPOINT: "http://alloy:4317"
     ports:
       - "${API_PORT}:8080"
     depends_on:
@@ -228,5 +229,93 @@ services:
     profiles:
       - app
 
+  # ---------------------------------------------------------------------------
+  # Observability stack
+  # ---------------------------------------------------------------------------
+
+  loki:
+    image: grafana/loki:3.5.0
+    command: -config.file=/etc/loki/loki.yml
+    volumes:
+      - ./observability/loki/loki.yml:/etc/loki/loki.yml:ro
+      - loki_data:/loki
+    ports:
+      - "${LOKI_PORT:-3101}:3100"
+    restart: unless-stopped
+    profiles:
+      - observability
+
+  alloy:
+    image: grafana/alloy:v1.14.1
+    environment:
+      API_PORT: "${API_PORT:-8000}"
+    command: run /etc/alloy/config.alloy --server.http.listen-addr=0.0.0.0:12345
+    volumes:
+      - ./observability/alloy/config.alloy:/etc/alloy/config.alloy:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    ports:
+      - "4317:4317"
+      - "4318:4318"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    depends_on:
+      - loki
+      - tempo
+      - prometheus
+    restart: unless-stopped
+    profiles:
+      - observability
+
+  prometheus:
+    image: prom/prometheus:v3.4.0
+    command:
+      - --config.file=/etc/prometheus/prometheus.yml
+      - --storage.tsdb.path=/prometheus
+      - --web.enable-lifecycle
+      - --web.enable-remote-write-receiver
+    volumes:
+      - ./observability/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus_data:/prometheus
+    ports:
+      - "${PROMETHEUS_PORT:-9090}:9090"
+    restart: unless-stopped
+    profiles:
+      - observability
+
+  tempo:
+    image: grafana/tempo:2.7.2
+    command: -config.file=/etc/tempo/tempo.yml
+    volumes:
+      - ./observability/tempo/tempo.yml:/etc/tempo/tempo.yml:ro
+      - tempo_data:/var/tempo
+    ports:
+      - "${TEMPO_PORT:-3200}:3200"
+    restart: unless-stopped
+    profiles:
+      - observability
+
+  grafana:
+    image: grafana/grafana:12.0.1
+    environment:
+      GF_AUTH_ANONYMOUS_ENABLED: "true"
+      GF_AUTH_ANONYMOUS_ORG_ROLE: Admin
+      GF_AUTH_DISABLE_LOGIN_FORM: "true"
+    volumes:
+      - ./observability/grafana/provisioning:/etc/grafana/provisioning:ro
+      - grafana_data:/var/lib/grafana
+    ports:
+      - "${GRAFANA_PORT:-3100}:3000"
+    depends_on:
+      - loki
+      - prometheus
+      - tempo
+    restart: unless-stopped
+    profiles:
+      - observability
+
 volumes:
   postgres_data:
+  loki_data:
+  prometheus_data:
+  tempo_data:
+  grafana_data:
