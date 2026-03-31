@@ -1,0 +1,83 @@
+@kratosPublic = http://localhost:4433
+@apiBase = http://localhost:8001
+@email = test@dev.local
+@password = T3stD3v!xKz9mQ2026
+
+### 1. Start registration flow
+# @name startRegistration
+GET {{kratosPublic}}/self-service/registration/api
+Accept: application/json
+
+### 2. Complete registration (password)
+# @name completeRegistration
+@registrationFlowId = {{startRegistration.response.body.id}}
+
+POST {{kratosPublic}}/self-service/registration?flow={{registrationFlowId}}
+Accept: application/json
+Content-Type: application/json
+
+{
+  "method": "password",
+  "password": "{{password}}",
+  "traits": {
+    "email": "{{email}}"
+  }
+}
+
+### 3. Start verification flow
+# @name startVerification
+GET {{kratosPublic}}/self-service/verification/api
+Accept: application/json
+
+### 4. Submit email for verification code
+# @name submitVerificationEmail
+@verificationFlowId = {{startVerification.response.body.id}}
+
+POST {{kratosPublic}}/self-service/verification?flow={{verificationFlowId}}
+Accept: application/json
+Content-Type: application/json
+
+{
+  "method": "code",
+  "email": "{{email}}"
+}
+
+### 5. Submit verification code (get from Mailpit http://localhost:8025)
+# @name submitVerificationCode
+@verificationCode = 887021  
+
+POST {{kratosPublic}}/self-service/verification?flow={{verificationFlowId}}
+Accept: application/json
+Content-Type: application/json
+
+{
+  "method": "code",
+  "code": "{{verificationCode}}"
+}
+
+### 6. Start login flow
+# @name startLogin
+GET {{kratosPublic}}/self-service/login/api
+Accept: application/json
+
+### 7. Complete login
+# @name completeLogin
+@loginFlowId = {{startLogin.response.body.id}}
+
+POST {{kratosPublic}}/self-service/login?flow={{loginFlowId}}
+Accept: application/json
+Content-Type: application/json
+
+{
+  "method": "password",
+  "identifier": "{{email}}",
+  "password": "{{password}}"
+}
+
+### 8. Check session (whoami)
+# @name whoami
+@sessionToken = {{completeLogin.response.body.session_token}}
+
+GET {{kratosPublic}}/sessions/whoami
+Accept: application/json
+X-Session-Token: {{sessionToken}}

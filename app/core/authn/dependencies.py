@@ -9,6 +9,7 @@ from app.core.api_keys.services import ApiKeyService
 from app.core.authn.adapters import KratosSessionProvider, UserRepositorySql
 from app.core.authn.entities import User
 from app.core.authn.errors import UserNotRegisteredError
+from app.core.authn.errors.invalid_session_error import InvalidSessionError
 from app.core.authn.ports import SessionProvider, UserRepository
 from app.core.authn.services import AuthService, UserService
 from app.core.database.engine import DbSession
@@ -97,6 +98,8 @@ async def _resolve_user_from_api_key(
     if not x_api_key:
         return None
     api_key = await api_key_service.validate_api_key(x_api_key)
+    if not api_key.can_be_used:
+        raise InvalidSessionError()
     return await user_service.find_user_by_id(api_key.user_id)
 
 

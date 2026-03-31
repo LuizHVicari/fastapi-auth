@@ -64,7 +64,8 @@
       "Bash(curl -s http://localhost:4433/health/ready)",
       "Bash(python3 -c \"import sys; sys.path.insert\\(0, ''.''\\); from app.core.authn.services import AuthService; print\\(''Import successful''\\)\")",
       "Bash(docker inspect:*)",
-      "Bash(docker restart:*)"
+      "Bash(docker restart:*)",
+      "Bash(curl -s -X POST \"http://localhost:4433/self-service/verification?flow=2df17168-e525-4cbb-ae14-54d3b7f5cdcd\" -H \"Accept: application/json\" -H \"Content-Type: application/json\" -d '{\"\"\"\"method\"\"\"\":\"\"\"\"code\"\"\"\",\"\"\"\"code\"\"\"\":\"\"\"\"887021\"\"\"\"}')"
     ],
     "additionalDirectories": [
       "/home/luiz/dev/alfa/poc-ai/server/migrations/versions"

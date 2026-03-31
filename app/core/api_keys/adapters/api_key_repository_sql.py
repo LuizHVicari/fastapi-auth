@@ -54,6 +54,7 @@ class ApiKeyRepositorySql(ApiKeyRepository):
         api_key_model.updated_at = api_key.updated_at
 
         self.__db_session.add(api_key_model)
+        await self.__db_session.flush()
         await self.__db_session.refresh(api_key_model)
         return self.__model_to_entity(api_key_model)
 

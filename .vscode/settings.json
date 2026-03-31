@@ -12,5 +12,7 @@
       "source.organizeImports.ruff": "explicit"
     }
   },
-  "python.analysis.pyrightConfig": "${workspaceFolder}/pyproject.toml"
+  "python.analysis.pyrightConfig": "${workspaceFolder}/pyproject.toml",
+  "rest-client.enableSendCookies": false,
+  "rest-client.rememberCookiesForSubsequentRequests": false
 }

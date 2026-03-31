@@ -1,0 +1,59 @@
+@apiBase = http://localhost:8001
+@sessionToken = ory_st_oppd1xMQMrQ5xmumexwK4afyZrxajre9
+
+### 1. Create profile (first time after registration)
+# @name createProfile
+POST {{apiBase}}/authn/profile
+Content-Type: application/json
+X-Session-Token: {{sessionToken}}
+
+{
+  "name": "Test User",
+  "avatar_url": null
+}
+
+### 2. Get current user
+# @name currentUser
+GET {{apiBase}}/authn/current-user
+X-Session-Token: {{sessionToken}}
+
+### 3. Update profile
+# @name updateProfile
+PUT {{apiBase}}/authn/profile
+Content-Type: application/json
+X-Session-Token: {{sessionToken}}
+
+{
+  "name": "Updated Name",
+  "avatar_url": null
+}
+
+### 4. Create API key
+# @name createApiKey
+POST {{apiBase}}/api-keys
+Content-Type: application/json
+X-Session-Token: {{sessionToken}}
+
+{
+  "description": "My test key",
+  "duration_days": 30
+}
+
+### 5. List API keys
+# @name listApiKeys
+GET {{apiBase}}/api-keys
+X-Session-Token: {{sessionToken}}
+
+### 6. Test auth via API key
+# @name authViaApiKey
+@apiKeyString = {{createApiKey.response.body.key_string}}
+
+GET {{apiBase}}/authn/current-user
+X-API-Key: {{apiKeyString}}
+
+### 7. Revoke API key
+# @name revokeApiKey
+@publicKey = {{listApiKeys.response.body.items[0].public_key}}
+
+DELETE {{apiBase}}/api-keys/{{publicKey}}
+X-Session-Token: {{sessionToken}}
