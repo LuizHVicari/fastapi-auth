@@ -1,3 +1,5 @@
+from uuid import UUID
+
 from app.core.authn.entities import User
 from app.core.authn.errors import UserAlreadyExistsError, UserNotFoundError
 from app.core.authn.ports import UserRepository
@@ -27,3 +29,6 @@ class UserService:
             raise UserNotFoundError(user_id=user.id)
 
         return await self.__user_repository.update_user(user)
+
+    async def find_user_by_id(self, user_id: UUID) -> User | None:
+        return await self.__user_repository.find_user_by_id(user_id)

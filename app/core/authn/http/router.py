@@ -7,7 +7,7 @@ from app.core.authn.entities.user import User
 from app.core.authn.schemas import CurrentUserResponse, UserRequest, UserResponse
 from app.utils.time_utils import now_utc
 
-router = APIRouter(prefix="/authn")
+router = APIRouter(prefix="/authn", tags=["auth"])
 
 
 def _to_user_response(user: User) -> UserResponse:

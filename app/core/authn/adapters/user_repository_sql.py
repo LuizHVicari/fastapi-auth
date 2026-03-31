@@ -60,7 +60,6 @@ class UserRepositorySql(UserRepository):
             updated_at=user.updated_at,
         )
         self.__db_session.add(new_user)
-        await self.__db_session.commit()
         await self.__db_session.refresh(new_user)
 
         return User(
@@ -87,7 +86,6 @@ class UserRepositorySql(UserRepository):
         existing_user.updated_at = user.updated_at
 
         self.__db_session.add(existing_user)
-        await self.__db_session.commit()
         await self.__db_session.refresh(existing_user)
 
         return User(

@@ -7,14 +7,15 @@ from fastapi import Depends, HTTPException, status
 
 from app.core.authn.dependencies import CurrentUser
 from app.core.authz.adapters import KetAuthzProvider
+from app.core.authz.ports import AuthzProvider
 from app.core.authz.services import AuthzService
 
 
-def get_authz_provider() -> KetAuthzProvider:
+def get_authz_provider() -> AuthzProvider:
     return KetAuthzProvider()
 
 
-AuthzProviderDep = Annotated[KetAuthzProvider, Depends(get_authz_provider)]
+AuthzProviderDep = Annotated[AuthzProvider, Depends(get_authz_provider)]
 
 
 def get_authz_service(provider: AuthzProviderDep) -> AuthzService:

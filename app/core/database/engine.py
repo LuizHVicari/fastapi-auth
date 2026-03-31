@@ -14,6 +14,7 @@ _session_factory = async_sessionmaker(engine, expire_on_commit=False)
 async def get_session() -> AsyncGenerator[AsyncSession]:
     async with _session_factory() as session:
         yield session
+        await session.commit()
 
 
 DbSession = Annotated[AsyncSession, Depends(get_session)]

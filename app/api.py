@@ -14,6 +14,7 @@ from app.core.telemetry import setup_logging, setup_tracing
 
 setup_logging()
 
+from .core.api_keys.http import api_key_router
 from .core.authn.http import authn_router, authn_webhooks_router
 from .core.database import engine
 
@@ -48,6 +49,7 @@ FastAPIInstrumentor.instrument_app(app)
 
 app.include_router(authn_webhooks_router)
 app.include_router(authn_router)
+app.include_router(api_key_router)
 
 
 @app.middleware("http")

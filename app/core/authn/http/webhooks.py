@@ -7,7 +7,7 @@ from loguru import logger
 from app.core.authn.schemas import KratosWebhookResponse, RegistrationWebhookRequest
 from app.core.env import settings
 
-router = APIRouter(prefix="/webhooks")
+router = APIRouter(prefix="/webhooks", tags=["webhooks"])
 
 
 @router.post("/kratos/registration")
