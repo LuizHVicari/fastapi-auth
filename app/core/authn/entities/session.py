@@ -3,13 +3,13 @@ from dataclasses import dataclass
 from uuid import UUID
 
 
-@dataclass
+@dataclass(slots=True, kw_only=True)
 class SessionIdentity:
     id: UUID
     traits: dict[str, str]
 
 
-@dataclass
+@dataclass(slots=True, kw_only=True)
 class Session:
     id: UUID
     active: bool

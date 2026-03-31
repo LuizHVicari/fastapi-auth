@@ -3,7 +3,7 @@ from dataclasses import dataclass
 from uuid import UUID
 
 
-@dataclass(kw_only=True, slots=True)
+@dataclass(frozen=True, slots=True, kw_only=True)
 class User:
     id: UUID
     auth_provider_id: str

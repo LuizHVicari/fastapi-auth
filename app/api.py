@@ -4,7 +4,6 @@ from contextlib import asynccontextmanager
 from typing import Any, TypedDict
 
 from fastapi import FastAPI, HTTPException, Request
-from fastapi.staticfiles import StaticFiles
 from loguru import logger
 from opentelemetry import trace as otel_trace
 from prometheus_fastapi_instrumentator import Instrumentator
@@ -15,10 +14,8 @@ from app.core.telemetry import setup_logging, setup_tracing
 
 setup_logging()
 
-from .core.auth.http import auth_router
 from .core.authn.http import authn_router, authn_webhooks_router
 from .core.database import engine
-from .core.oauth2.http import router as oauth2_router
 
 setup_tracing(engine)
 
@@ -49,12 +46,8 @@ app = FastAPI(
 Instrumentator().instrument(app).expose(app)
 FastAPIInstrumentor.instrument_app(app)
 
-app.mount("/static", StaticFiles(directory="static"), name="static")
-
-app.include_router(auth_router)
 app.include_router(authn_webhooks_router)
 app.include_router(authn_router)
-app.include_router(oauth2_router)
 
 
 @app.middleware("http")

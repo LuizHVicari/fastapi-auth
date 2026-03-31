@@ -132,7 +132,7 @@ class KetAuthzProvider(AuthzProvider):
         object_id: UUID | None,
     ) -> None:
         async with httpx.AsyncClient() as client:
-            await client.put(
+            response = await client.put(
                 f"{settings.keto_write_url}/relation-tuples",
                 json={
                     "namespace": str(object_type),
@@ -141,6 +141,7 @@ class KetAuthzProvider(AuthzProvider):
                     "subject_id": str(subject_id),
                 },
             )
+        response.raise_for_status()
 
     async def __delete(
         self,
@@ -150,7 +151,7 @@ class KetAuthzProvider(AuthzProvider):
         object_id: UUID | None,
     ) -> None:
         async with httpx.AsyncClient() as client:
-            await client.delete(
+            response = await client.delete(
                 f"{settings.keto_write_url}/relation-tuples",
                 params={
                     "namespace": str(object_type),
@@ -159,3 +160,4 @@ class KetAuthzProvider(AuthzProvider):
                     "subject_id": str(subject_id),
                 },
             )
+        response.raise_for_status()

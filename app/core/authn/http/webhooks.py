@@ -2,6 +2,7 @@ import hmac
 from typing import Annotated
 
 from fastapi import APIRouter, Header, HTTPException, status
+from loguru import logger
 
 from app.core.authn.schemas import KratosWebhookResponse, RegistrationWebhookRequest
 from app.core.env import settings
@@ -24,5 +25,5 @@ async def kratos_registration_webhook(
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid webhook secret"
         )
-    print("Received Kratos registration webhook:", body)
+    logger.info("Received Kratos registration webhook: {body}", body=body)
     return {"status": "received"}

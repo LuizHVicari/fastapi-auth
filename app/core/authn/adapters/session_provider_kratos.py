@@ -7,6 +7,7 @@ from app.core.authn.entities.session import Session, SessionIdentity
 from app.core.authn.ports import SessionProvider
 from app.core.authn.ports.session_provider import ProviderFailure, ProviderResponse, ProviderSuccess
 from app.core.env import settings
+from app.utils.time_utils import parse_iso
 
 
 class KratosSessionProvider(SessionProvider):
@@ -30,7 +31,7 @@ class KratosSessionProvider(SessionProvider):
             session=Session(
                 id=UUID(str(data["id"])),
                 active=data["active"],
-                expires_at=data["expires_at"],
+                expires_at=parse_iso(str(data["expires_at"])),
                 identity=SessionIdentity(
                     id=UUID(str(data["identity"]["id"])),
                     traits=data["identity"]["traits"],
