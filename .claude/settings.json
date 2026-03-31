@@ -62,7 +62,9 @@
       "Read(//tmp/**)",
       "Bash(python3 -c \"from starlette.templating import Jinja2Templates; import inspect; print\\(inspect.getfile\\(Jinja2Templates\\)\\)\")",
       "Bash(curl -s http://localhost:4433/health/ready)",
-      "Bash(python3 -c \"import sys; sys.path.insert\\(0, ''.''\\); from app.core.authn.services import AuthService; print\\(''Import successful''\\)\")"
+      "Bash(python3 -c \"import sys; sys.path.insert\\(0, ''.''\\); from app.core.authn.services import AuthService; print\\(''Import successful''\\)\")",
+      "Bash(docker inspect:*)",
+      "Bash(docker restart:*)"
     ],
     "additionalDirectories": [
       "/home/luiz/dev/alfa/poc-ai/server/migrations/versions"
